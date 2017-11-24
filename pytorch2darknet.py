@@ -1,7 +1,7 @@
 import torch
 import torchvision
 from cfg import save_conv, save_conv_bn, save_fc
-
+import mobilenet
 def save_bottlenet_weights(model, fp):
     save_conv_bn(fp, model.conv1, model.bn1)
     save_conv_bn(fp, model.conv2, model.bn2)
@@ -40,13 +40,16 @@ def save_alexnet_weights(model, filename):
     
 
 
-model_name = 'alexnet'
+model_name = 'mobilenet'
 if model_name == 'resnet50':
     resnet50 = torchvision.models.resnet50(pretrained=True)
     print('convert pytorch resnet50 to darkent, save resnet50.weights')
     save_resnet_weights(resnet50, 'resnet50.weights')
 
-elif model_name == 'alexnet':
-    alexnet = torchvision.models.alexnet(pretrained=True)
+elif model_name == 'mobilenet':
+    #mobilenet = torchvision.models.alexnet(pretrained=True)
+    mobilenet = mobilenet.Net()
+    checkpoint = torch.load('weights/mobilenet_52_shallow05.pth.tar')
+    mobilenet.load_state_dict(checkpoint['state_dict']) 
     print('convert pytorch alexnet to darknet, save alexnet-pytorch2darknet.weights')
-    save_alexnet_weights(alexnet, 'alexnet-pytorch2darknet.weights')
+    save_alexnet_weights(mobilenet, 'alexnet-pytorch2darknet.weights')
