@@ -53,7 +53,7 @@ class Net(nn.Module):
             conv_dw(512, 512, 1),
             nn.AvgPool2d(7),
         )
-        self.fc = nn.Linear(512, 1000)
+        self.fc = nn.Linear(512, 365)
 
     def forward(self, x):
         x = self.model(x)
