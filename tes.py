@@ -13,6 +13,7 @@ import torch.utils.data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
+import math
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -23,25 +24,27 @@ model_names.append('testnet')
 
 class SPPLayer(nn.Module):
 
-    def __init__(self, num_levels, sizes, strides):
+    def __init__(self, num_levels, pool_type='max_pool'):
         super(SPPLayer, self).__init__()
 
         self.num_levels = num_levels
-        self.sizes = sizes
-	self.strides = strides
+        self.pool_type = pool_type
 
     def forward(self, x):
         bs, c, h, w = x.size()
         pooling_layers = []
         for i in range(self.num_levels):
-            kernel_size = self.sizes[i]
-	    kernel_stride = self.strides[i]
-            tensor = F.max_pool2d(x, kernel_size=kernel_size,
+            kernel_size = int(math.ceil(h/(i+1)))
+            kernel_stride = int(math.floor(h/(i+1)))
+            if self.pool_type == 'max_pool':
+                tensor = F.max_pool2d(x, kernel_size=kernel_size,
+                                      stride=kernel_stride).view(bs, -1)
+            else:
+                tensor = F.avg_pool2d(x, kernel_size=kernel_size,
                                       stride=kernel_stride).view(bs, -1)
             pooling_layers.append(tensor)
         x = torch.cat(pooling_layers, dim=-1)
         return x
-
 
 class TestSiam(nn.Module):
     def __init__(self):
@@ -79,7 +82,7 @@ class TestSiam(nn.Module):
             #nn.AvgPool2d(7),
         )
 
-        self.spp = SPPLayer(3,[1,2,4],[1,1,1])
+        self.spp = SPPLayer(4)
         self.fc = nn.Linear(512, 365)
 
     def forward(self, x):
