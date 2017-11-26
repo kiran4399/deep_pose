@@ -88,8 +88,8 @@ def main():
     # Data loading code
     traindir = os.path.join(args.data, 'train')
     valdir = os.path.join(args.data, 'val')
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
+    normalize = transforms.Normalize(mean=[0.554, 0.486, 0.439],
+                                     std=[0.314, 0.314, 0.314])
 
     train_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(traindir, transforms.Compose([
@@ -112,7 +112,7 @@ def main():
         num_workers=args.workers, pin_memory=True)
 
     # define loss function (criterion) and pptimizer
-    criterion =ContrastiveLoss()
+    criterion =Loss()
 
     optimizer = torch.optim.Adam(model.parameters(), args.lr,
                                 momentum=args.momentum,

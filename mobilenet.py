@@ -49,11 +49,16 @@ class Net(nn.Module):
             conv_dw(64, 128, 2),
             conv_dw(128, 128, 1),
             conv_dw(128, 256, 2),
+            conv_dw(256, 256, 1),
+            conv_dw(256, 256, 1),
+            conv_dw(256, 256, 1),
+            conv_dw(256, 256, 1),
+            conv_dw(256, 256, 1),
             conv_dw(256, 512, 2),
             conv_dw(512, 512, 1),
             nn.AvgPool2d(7),
         )
-        self.fc = nn.Linear(512, 365)
+        self.fc = nn.Linear(512, 1000)
 
     def forward(self, x):
         x = self.model(x)
