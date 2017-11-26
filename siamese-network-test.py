@@ -39,7 +39,8 @@ iteration_number= 0
 for epoch in range(0,Config.train_number_epochs):
     for i, data in enumerate(train_dataloader,0):
         img0, img1 , label = data
-        #remermber to add cuda to variables
+        print label
+	#remermber to add cuda to variables
         img0, img1 , label = Variable(img0), Variable(img1) , Variable(label)
         output1,output2 = net(img0,img1)
         optimizer.zero_grad()

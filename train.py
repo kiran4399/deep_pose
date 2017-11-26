@@ -18,8 +18,9 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
 import mobilenet
-import wideresnet
+#import wideresnet
 import pdb
+import tes
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(models.__dict__[name]))
@@ -68,7 +69,7 @@ def main():
     print("=> creating model '{}'".format(args.arch))
     print("=> creating model '{}'".format(args.arch))
     if args.arch.startswith('siamese'):
-        model = siamese.Network()
+        model = tes.SiameseNetwork()
         print(model)
     model = torch.nn.DataParallel(model).cuda()
     # optionally resume from a checkpoint
@@ -153,7 +154,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
     model.train()
 
     end = time.time()
-    for i, (input, target) in enumerate(train_loader):
+    for i, (input, target) in enumerate(val_loader):
         # measure data loading time
         data_time.update(time.time() - end)
 

@@ -29,14 +29,17 @@ def save_alexnet_weights(model, filename):
     fp = open(filename, 'wb')
     header = torch.IntTensor([0,0,0,0])
     header.numpy().tofile(fp)
-    for layer in model.features:
+    for layer in model.model:
+	print layer
         if type(layer) == torch.nn.Conv2d:
-            print(layer)
+            print "1"
+	    print(layer)
             save_conv(fp, layer)
-    for layer in model.classifier:
-        if type(layer) == torch.nn.Linear:
+    #for layer in model.fc:
+        
+    if type(model.fc) == torch.nn.Linear:
             print(layer)
-            save_fc(fp, layer)
+            save_fc(fp, model.fc)
     
 
 
@@ -49,7 +52,7 @@ if model_name == 'resnet50':
 elif model_name == 'mobilenet':
     #mobilenet = torchvision.models.alexnet(pretrained=True)
     mobilenet = mobilenet.Net()
-    checkpoint = torch.load('weights/mobilenet_52_shallow05.pth.tar')
-    mobilenet.load_state_dict(checkpoint['state_dict']) 
+    checkpoint = torch.load('whole_mobilenet.pth.tar')
+    #mobilenet.load_state_dict(checkpoint['state_dict']) 
     print('convert pytorch alexnet to darknet, save alexnet-pytorch2darknet.weights')
     save_alexnet_weights(mobilenet, 'alexnet-pytorch2darknet.weights')

@@ -13,7 +13,7 @@ import PIL.ImageOps
 import torch.nn as nn
 from torch import optim
 import torch.nn.functional as F
-
+import pandas as pd
 
 class Config():
     training_dir = "./data"
@@ -24,7 +24,8 @@ class Config():
 
 class SiameseNetworkDataset(Dataset):
     
-    def __init__(self,imageFolderDataset,transform=None,should_invert=True):
+    def __init__(self,csv_file,imageFolderDataset,transform=None,should_invert=True):
+	self.file_data = pd.read_csv(csv_file)
         self.imageFolderDataset = imageFolderDataset    
         self.transform = transform
         self.should_invert = should_invert
@@ -54,7 +55,9 @@ class SiameseNetworkDataset(Dataset):
         if self.transform is not None:
             img0 = self.transform(img0)
             img1 = self.transform(img1)
-        
+     
+	#Create numpy array of 7D pose as the label#	
+	np.array 
         return img0, img1 , torch.from_numpy(np.array([int(img1_tuple[1]!=img0_tuple[1])],dtype=np.float32))
     
     def __len__(self):
