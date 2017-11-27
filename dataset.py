@@ -43,4 +43,4 @@ class SiameseNetworkDataset(Dataset):
         return img0, img1, torch.from_numpy(np.array([res[3], res[4], res[5], res[6] res[7], res[8], res[9]],dtype=np.float32))
     
     def __len__(self):
-        return len(self.csvfile)
+        return len(read.index)
