@@ -20,7 +20,6 @@ import torchvision.models as models
 import siamese
 import dataset
 import pdb
-import tes
 import loss
 
 model_names = sorted(name for name in models.__dict__
@@ -166,9 +165,9 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
     end = time.time()
     for i, data in enumerate(train_loader,0):
-	img0, img1, label = data
-	img0, img1, label = torch.autograd.Variable(img0).cuda(), torch.autograd.Variable(img1).cuda(), torch.autograd.Variable(label).cuda(async=True)
-	output1, output2 = model(img0, img1)
+        img0, img1, label = data
+        img0, img1, label = torch.autograd.Variable(img0).cuda(), torch.autograd.Variable(img1).cuda(), torch.autograd.Variable(label).cuda(async=True)
+        output1, output2 = model(img0, img1)
         # measure data loading time
         data_time.update(time.time() - end)
 

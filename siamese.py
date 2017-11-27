@@ -91,8 +91,8 @@ class SiameseNetwork(nn.Module):
 
     def forward_once(self, x):
         output = self.model(x)
-	output = self.spp(output)
-	output = self.fc(output)
+        output = self.spp(output)
+        output = self.fc(output)
         return output
 
     def forward(self, input1, input2):
