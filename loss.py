@@ -45,10 +45,9 @@ class PLoss(torch.nn.Module):
 	#print "hello"
         rot = torch.mul(rot_distance.data, self.margin)
         #print(rot)
-        #rot = beta*rot_distance.data.cpu()
         #print "done", trans_distance, rot, beta
        # print(trans_distance.data)
-        #loss = (trans_distance.data.cpu()) + rot.cpu()
-        loss = trans_distance.data + rot
-	print loss
-        return Variable(loss)
+        loss = torch.mean((trans_distance) + Variable(rot))
+	#print loss
+        #loss = torch.mean(trans_distance + rot_distance)
+        return loss

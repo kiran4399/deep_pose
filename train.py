@@ -167,6 +167,8 @@ def train(train_loader, model, criterion, optimizer, epoch):
     model.train()
 
     end = time.time()
+    iteration_number = 0
+    counter = []
     for i, data in enumerate(train_loader,0):
         img0, img1, label = data
         img0, img1, label = torch.autograd.Variable(img0).cuda(), torch.autograd.Variable(img1).cuda(), torch.autograd.Variable(label).cuda(async=True)
@@ -180,13 +182,15 @@ def train(train_loader, model, criterion, optimizer, epoch):
         # compute output
         output1, output2 = model(img0, img1)
         ploss = criterion(output1, output2, label)
+	#print ploss
 ##############
         optimizer.zero_grad()
         ploss = criterion(output1,output2,label)
+	#print "ploss is", ploss
         ploss.backward()
         optimizer.step()
         if i %10 == 0 :
-            print("Epoch number {}\n Current loss {}\n".format(epoch,ploss.data[0]))
+            #print("Epoch number {}\n Current loss {}\n".format(epoch,ploss.data[0]))
             iteration_number +=10
             counter.append(iteration_number)
             losses.update(ploss.data[0])
