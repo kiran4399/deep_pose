@@ -17,7 +17,7 @@ import torch.utils.data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
-import mobilenet
+import siamese
 #import wideresnet
 import pdb
 import tes
@@ -95,24 +95,30 @@ def main():
     normalize = transforms.Normalize(mean=[0.554, 0.486, 0.439],
                                      std=[0.314, 0.314, 0.314])
 
+
+    siamese_train = SiameseNetworkDataset(imageFolderDataset=folder_dataset_test,
+                                        csvfile=args.traincsv,
+                                        transforms.Compose([
+                                        transforms.RandomSizedCrop(224),
+                                        transforms.RandomHorizontalFlip(),
+                                        transforms.ToTensor(),
+                                        normalize,]))
+
     train_loader = torch.utils.data.DataLoader(
-        datasets.ImageFolder(traindir, transforms.Compose([
-            transforms.RandomSizedCrop(224),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            normalize,
-        ])),
+        siamese_dataset
         batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=True)
 
+    siamese_val = SiameseNetworkDataset(imageFolderDataset=folder_dataset_test,
+                                        csvfile=args.valcsv,
+                                        transforms.Compose([
+                                        transforms.Scale(256),
+                                        transforms.CenterCrop(224),
+                                        transforms.ToTensor(),
+                                        normalize,]))
     val_loader = torch.utils.data.DataLoader(
-        datasets.ImageFolder(valdir, transforms.Compose([
-            transforms.Scale(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            normalize,
-        ])),
-        batch_size=args.batch_size, shuffle=False,
+        siamese_val
+        batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=True)
 
     # define loss function (criterion) and pptimizer

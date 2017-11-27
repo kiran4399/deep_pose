@@ -21,14 +21,13 @@ class PLoss(torch.nn.Module):
     Based on: http://yann.lecun.com/exdb/publis/pdf/hadsell-chopra-lecun-06.pdf
     """
 
-    def __init__(self, margin=2.0):
+    def __init__(self, margin=10.0):
         super(PLoss, self).__init__()
         self.margin = margin
 
     def forward(self, output1, output2, label):
-        euclidean_distance = F.pairwise_distance(output1, output2)
-        loss_contrastive = torch.mean((1-label) * torch.pow(euclidean_distance, 2) +
-                                      (label) * torch.pow(torch.clamp(self.margin - euclidean_distance, min=0.0), 2))
-
-
-        return loss_contrastive
+        total = output1+output2
+        trans_distance = F.pairwise_distance(total[:4], label[:4])
+        rot_distance = F.pairwise_distance(total[4:], label[4:])
+        loss = trans_distance + self.margin*rot_distance
+        return loss
