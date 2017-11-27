@@ -18,9 +18,11 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
 import siamese
-#import wideresnet
+import dataset
 import pdb
 import tes
+import loss
+
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(models.__dict__[name]))
@@ -43,7 +45,7 @@ parser.add_argument('--epochs', default=20, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
-parser.add_argument('-b', '--batch-size', default=256, type=int,
+parser.add_argument('-b', '--batch-size', default=128, type=int,
                     metavar='N', help='mini-batch size (default: 256)')
 parser.add_argument('--lr', '--learning-rate', default=1e-4, type=float,
                     metavar='LR', help='initial learning rate')
@@ -96,36 +98,36 @@ def main():
                                      std=[0.314, 0.314, 0.314])
 
 
-    siamese_train = SiameseNetworkDataset(imageFolderDataset=folder_dataset_test,
+    siamese_train = dataset.SiameseNetworkDataset(imageFolderDataset=args.data,
                                         csvfile=args.traincsv,
-                                        transforms.Compose([
-                                        transforms.RandomSizedCrop(224),
+                                        transform = transforms.Compose([
+                                        #transforms.RandomSizedCrop(224),
                                         transforms.RandomHorizontalFlip(),
                                         transforms.ToTensor(),
                                         normalize,]))
 
     train_loader = torch.utils.data.DataLoader(
-        siamese_dataset
+        siamese_train,
         batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=True)
 
-    siamese_val = SiameseNetworkDataset(imageFolderDataset=folder_dataset_test,
+    siamese_val = dataset.SiameseNetworkDataset(imageFolderDataset=args.data,
                                         csvfile=args.valcsv,
-                                        transforms.Compose([
+                                        transform = transforms.Compose([
                                         transforms.Scale(256),
                                         transforms.CenterCrop(224),
                                         transforms.ToTensor(),
                                         normalize,]))
     val_loader = torch.utils.data.DataLoader(
-        siamese_val
+        siamese_val,
         batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=True)
 
     # define loss function (criterion) and pptimizer
-    criterion = PLoss()
+    criterion = loss.PLoss()
 
     optimizer = torch.optim.Adam(model.parameters(), args.lr,
-                                momentum=args.momentum,
+                                #momentum=args.momentum,
                                 weight_decay=args.weight_decay)
 
     if args.evaluate:
@@ -163,22 +165,25 @@ def train(train_loader, model, criterion, optimizer, epoch):
     model.train()
 
     end = time.time()
-    for i, (input, target) in enumerate(val_loader):
+    for i, data in enumerate(train_loader,0):
+	img0, img1, label = data
+	img0, img1, label = torch.autograd.Variable(img0).cuda(), torch.autograd.Variable(img1).cuda(), torch.autograd.Variable(label).cuda(async=True)
+	output1, output2 = model(img0, img1)
         # measure data loading time
         data_time.update(time.time() - end)
 
-        target = target.cuda(async=True)
-        input_var = torch.autograd.Variable(input)
-        target_var = torch.autograd.Variable(target)
+        #target = target.cuda(async=True)
+        #input_var = torch.autograd.Variable(input)
+        #target_var = torch.autograd.Variable(target)
         # compute output
-        output = model(input_var)
-        loss = criterion(output, target_var)
+        output1, output2 = model(img0, img1)
+        loss = criterion(output1, output2, label)
 
         # measure accuracy and record loss
-        prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
-        losses.update(loss.data[0], input.size(0))
-        top1.update(prec1[0], input.size(0))
-        top5.update(prec5[0], input.size(0))
+        prec1, prec5 = accuracy(output1+output2, label, topk=(1, 5))
+        losses.update(loss.data[0])
+        top1.update(prec1[0])
+        top5.update(prec5[0])
 
         # compute gradient and do SGD step
         optimizer.zero_grad()

@@ -32,15 +32,15 @@ class SiameseNetworkDataset(Dataset):
         res = read.ix[index][:]
 
         impath = os.path.join(self.imageFolderDataset, "scan%d"%res[2])
-        print impath
-        img0 = Image.open(impath + 'clean_%03d'%res[0] + '_max.png')
-        img1 = Image.open(impath + 'clean_%03d'%res[1] + '_max.png')
+        img0 = Image.open(impath + '/clean_%03d'%res[0] + '_max.png')
+        img1 = Image.open(impath + '/clean_%03d'%res[1] + '_max.png')
 
         if self.transform is not None:
             img0 = self.transform(img0)
             img1 = self.transform(img1)
-        
-        return img0, img1, torch.from_numpy(np.array([res[3], res[4], res[5], res[6] res[7], res[8], res[9]],dtype=np.float32))
+       
+        return img0, img1, torch.from_numpy(np.array([res[3], res[4], res[5], res[6], res[7], res[8], res[9]],dtype=np.float32))
     
     def __len__(self):
+	read = pd.read_csv(self.csvfile)
         return len(read.index)

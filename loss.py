@@ -27,7 +27,26 @@ class PLoss(torch.nn.Module):
 
     def forward(self, output1, output2, label):
         total = output1+output2
-        trans_distance = F.pairwise_distance(total[:4], label[:4])
-        rot_distance = F.pairwise_distance(total[4:], label[4:])
-        loss = trans_distance + self.margin*rot_distance
-        return loss
+       # print total
+	#trans_ind = torch.cuda.LongTensor([0, 1, 2])
+	#rot_ind = torch.cuda.LongTensor([3, 4, 5, 6])
+	#trans_val = total.index_select(1, trans_ind)
+	#rot_val = total.index_select(1, rot_ind)
+	trans_val = total.narrow(1,0,3)
+	rot_val = total.narrow(1,3,4)
+	#print trans_val, rot_val
+	#trans_label = label.index_select(1, trans_ind)
+	#rot_label = label.index_select(1, rot_ind)
+	trans_label = label.narrow(1,0,3)
+	rot_label = label.narrow(1,3,4)
+	#print trans_label
+	trans_distance = F.pairwise_distance(trans_val, trans_label)
+        rot_distance = F.pairwise_distance(rot_val, rot_label)
+	#print "hello"
+        rot = torch.mul(rot_distance.data, self.margin)
+        print rot
+        #rot = beta*rot_distance.data.cpu()
+        #print "done", trans_distance, rot, beta
+	print trans_distance.data
+        loss = (trans_distance.data.cpu()) + rot
+	return loss

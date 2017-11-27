@@ -13,14 +13,13 @@ import torch.utils.data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
+import math
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(models.__dict__[name]))
 
 model_names.append('siamnet')
-
-
 class SPPLayer(nn.Module):
 
     def __init__(self, num_levels, pool_type='max_pool'):
@@ -44,6 +43,7 @@ class SPPLayer(nn.Module):
             pooling_layers.append(tensor)
         x = torch.cat(pooling_layers, dim=-1)
         return x
+
 
 class SiameseNetwork(nn.Module):
     def __init__(self):
@@ -76,6 +76,11 @@ class SiameseNetwork(nn.Module):
             conv_dw(64, 128, 2),
             conv_dw(128, 128, 1),
             conv_dw(128, 256, 2),
+            conv_dw(256, 256, 1),
+            conv_dw(256, 256, 1),
+            conv_dw(256, 256, 1),
+            conv_dw(256, 256, 1),
+            conv_dw(256, 256, 1),
             conv_dw(256, 512, 2),
             conv_dw(512, 512, 1),
             #nn.AvgPool2d(7),
@@ -86,8 +91,8 @@ class SiameseNetwork(nn.Module):
 
     def forward_once(self, x):
         output = self.model(x)
-        output = output.view(output.size()[0], -1)
-        output = self.fc1(output)
+	output = self.spp(output)
+	output = self.fc(output)
         return output
 
     def forward(self, input1, input2):
