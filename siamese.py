@@ -22,18 +22,21 @@ model_names = sorted(name for name in models.__dict__
 model_names.append('siamnet')
 class SPPLayer(nn.Module):
 
-    def __init__(self, num_levels, pool_type='max_pool'):
+    def __init__(self, levels, pool_type='max_pool'):
         super(SPPLayer, self).__init__()
 
-        self.num_levels = num_levels
+        self.levels = levels
         self.pool_type = pool_type
 
     def forward(self, x):
         bs, c, h, w = x.size()
         pooling_layers = []
-        for i in range(self.num_levels):
-            kernel_size = int(math.ceil(h/(i+1)))
-            kernel_stride = int(math.floor(h/(i+1)))
+        for i in range(len(self.levels)):
+            kernel_size = int(math.ceil(h/self.levels[i]))
+            kernel_stride = int(math.floor(h/self.levels[i]))
+            #print("level is ", self.levels[i])
+            #print("stride is ", kernel_stride)
+            #print("size is ", kernel_size)
             if self.pool_type == 'max_pool':
                 tensor = F.max_pool2d(x, kernel_size=kernel_size,
                                       stride=kernel_stride).view(bs, -1)
@@ -86,13 +89,17 @@ class SiameseNetwork(nn.Module):
             #nn.AvgPool2d(7),
         )
 
-        self.spp = SPPLayer(4)
-        self.fc = nn.Linear(32256, 7)
-
+        self.spp = SPPLayer([1,2,4,7])
+        self.fc = nn.Linear(46080, 7)
+            #nn.BatchNorm1d(7),
     def forward_once(self, x):
         output = self.model(x)
+        #print(output)
         output = self.spp(output)
+        #print(output)
         output = self.fc(output)
+        #output = nn.BatchNorm1d(7)
+        #print(output)
         return output
 
     def forward(self, input1, input2):

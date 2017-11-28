@@ -143,11 +143,11 @@ def main():
         train(train_loader, model, criterion, optimizer, epoch)
 
         # evaluate on validation set
-        prec1 = validate(val_loader, model, criterion)
+        #prec1 = validate(val_loader, model, criterion)
 
         # remember best prec@1 and save checkpoint
-        is_best = prec1 > best_prec1
-        best_prec1 = max(prec1, best_prec1)
+        is_best = best_prec1
+        best_prec1 = max(best_prec1, best_prec1)
         save_checkpoint({
             'epoch': epoch + 1,
             'arch': args.arch,

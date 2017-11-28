@@ -43,11 +43,14 @@ class PLoss(torch.nn.Module):
         trans_distance = F.pairwise_distance(trans_val, trans_label)
         rot_distance = F.pairwise_distance(rot_val, rot_label)
 	#print "hello"
-        rot = torch.mul(rot_distance.data, self.margin)
+        #rot = torch.mul(rot_distance.data, 10)
         #print(rot)
         #print "done", trans_distance, rot, beta
        # print(trans_distance.data)
-        loss = torch.mean((trans_distance) + Variable(rot))
+        #loss = torch.mean((trans_distance) + Variable(rot))
+        loss = torch.mean(trans_distance + rot_distance)
 	#print loss
         #loss = torch.mean(trans_distance + rot_distance)
+        #print("output", output1, output2)
+        #print(label)
         return loss
