@@ -32,8 +32,8 @@ class SPPLayer(nn.Module):
         bs, c, h, w = x.size()
         pooling_layers = []
         for i in range(len(self.levels)):
-            kernel_size = int(math.ceil(h/self.levels[i]))
-            kernel_stride = int(math.floor(h/self.levels[i]))
+            kernel_size = int(math.ceil(float(h)/float(self.levels[i])))
+            kernel_stride = int(math.floor(float(h)/float(self.levels[i])))
             #print("level is ", self.levels[i])
             #print("stride is ", kernel_stride)
             #print("size is ", kernel_size)
