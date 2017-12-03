@@ -93,8 +93,8 @@ def main():
     # Data loading code
     traindir = os.path.join(args.data, 'train')
     valdir = os.path.join(args.data, 'val')
-normalize = transforms.Normalize(mean=[0.4991, 0.4652, 0.4637],
-                                     std=[0.2572, 0.2585, 0.2757])
+    normalize = transforms.Normalize(mean=[0.451, 0.390, 0.348],
+                                     std=[0.357, 0.350, 0.347])
 
 
     siamese_train = dataset.SiameseNetworkDataset(imageFolderDataset=args.data,
@@ -125,13 +125,13 @@ normalize = transforms.Normalize(mean=[0.4991, 0.4652, 0.4637],
     # define loss function (criterion) and pptimizer
     criterion = loss.PLoss()
 
-    optimizer = torch.optim.Adam(model.parameters(), args.lr,
-                                #momentum=args.momentum,
-                                weight_decay=args.weight_decay)
-
-    #optimizer = torch.optim.SGD(model.parameters(), args.lr,
+    #optimizer = torch.optim.Adam(model.parameters(), args.lr,
                                 #momentum=args.momentum,
                                 #weight_decay=args.weight_decay)
+
+    optimizer = torch.optim.SGD(model.parameters(), args.lr,
+                                momentum=args.momentum,
+                                weight_decay=args.weight_decay)
     if args.evaluate:
         validate(val_loader, model, criterion)
         return
@@ -172,7 +172,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
     for i, data in enumerate(train_loader,0):
         img0, img1, label = data
         img0, img1, label = torch.autograd.Variable(img0).cuda(), torch.autograd.Variable(img1).cuda(), torch.autograd.Variable(label).cuda(async=True)
-        output1, output2 = model(img0, img1)
+        #total = model(img0, img1)
         # measure data loading time
         data_time.update(time.time() - end)
 
@@ -180,12 +180,12 @@ def train(train_loader, model, criterion, optimizer, epoch):
         #input_var = torch.autograd.Variable(input)
         #target_var = torch.autograd.Variable(target)
         # compute output
-        output1, output2 = model(img0, img1)
-        ploss = criterion(output1, output2, label)
+        total = model(img0, img1)
+        #ploss = criterion(total, label)
 	#print ploss
 ##############
         optimizer.zero_grad()
-        ploss = criterion(output1,output2,label)
+        ploss = criterion(total,label)
 	#print "ploss is", ploss
         ploss.backward()
         optimizer.step()
