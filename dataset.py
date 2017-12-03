@@ -17,7 +17,7 @@ from dataset import *
 from siamese import *
 from loss import *
 import pandas as pd
-
+from numpy import linalg as LA
 
 class SiameseNetworkDataset(Dataset):
     
@@ -31,15 +31,16 @@ class SiameseNetworkDataset(Dataset):
         read = pd.read_csv(self.csvfile)
         res = read.ix[index][:]
 
-        impath = os.path.join(self.imageFolderDataset, "scan%d"%res[2])
-        img0 = Image.open(impath + '/clean_%03d'%res[0] + '_max.png')
-        img1 = Image.open(impath + '/clean_%03d'%res[1] + '_max.png')
+        impath = os.path.join(self.imageFolderDataset)
+        img0 = Image.open(impath + res[0])
+        img1 = Image.open(impath + res[1])
 
         if self.transform is not None:
             img0 = self.transform(img0)
             img1 = self.transform(img1)
-       
-        return img0, img1, torch.from_numpy(np.array([res[3], res[4], res[5], res[6], res[7], res[8], res[9]],dtype=np.float32))
+        trans = np.array([res[3], res[4], res[5]])
+        nor = LA(trans)
+        return img0, img1, torch.from_numpy(np.array([res[3]/nor, res[4]/nor, res[5]/nor, res[7], res[8], res[9], res[6]],dtype=np.float32))
     
     def __len__(self):
         read = pd.read_csv(self.csvfile)
