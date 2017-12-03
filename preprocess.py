@@ -22,10 +22,10 @@ import math
 import numpy as np
 
 train_loader = torch.utils.data.DataLoader(
-        dset.ImageFolder('Desktop', transforms.Compose([
+        dset.ImageFolder('../final', transforms.Compose([
             transforms.ToTensor(),
         ])))
-b = torch.FloatTensor(6781,3,224,224)
+b = torch.FloatTensor(12189,3,224,224)
 tt = enumerate(train_loader)
 
 for (i, da) in tt:

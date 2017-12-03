@@ -93,8 +93,8 @@ def main():
     # Data loading code
     traindir = os.path.join(args.data, 'train')
     valdir = os.path.join(args.data, 'val')
-    normalize = transforms.Normalize(mean=[0.451, 0.390, 0.348],
-                                     std=[0.357, 0.350, 0.347])
+normalize = transforms.Normalize(mean=[0.4991, 0.4652, 0.4637],
+                                     std=[0.2572, 0.2585, 0.2757])
 
 
     siamese_train = dataset.SiameseNetworkDataset(imageFolderDataset=args.data,

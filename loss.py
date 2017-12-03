@@ -25,9 +25,12 @@ class PLoss(torch.nn.Module):
         super(PLoss, self).__init__()
         self.margin = margin
 
-    def forward(self, output1, output2, label):
-        total = output1+output2
-       # print total
+    def forward(self, total, label):
+        #total = output1-output2
+        #print output1
+        #print output2
+	#print total
+	#print label
 	#trans_ind = torch.cuda.LongTensor([0, 1, 2])
 	#rot_ind = torch.cuda.LongTensor([3, 4, 5, 6])
 	#trans_val = total.index_select(1, trans_ind)
@@ -43,12 +46,12 @@ class PLoss(torch.nn.Module):
         trans_distance = F.pairwise_distance(trans_val, trans_label)
         rot_distance = F.pairwise_distance(rot_val, rot_label)
 	#print "hello"
-        #rot = torch.mul(rot_distance.data, 10)
+        rot = torch.mul(rot_distance.data, 10)
         #print(rot)
         #print "done", trans_distance, rot, beta
-       # print(trans_distance.data)
-        #loss = torch.mean((trans_distance) + Variable(rot))
-        loss = torch.mean(trans_distance + rot_distance)
+       	#print(trans_distance.data)
+        loss = torch.mean((trans_distance) + Variable(rot))
+        #loss = torch.mean(trans_distance + rot_distance)
 	#print loss
         #loss = torch.mean(trans_distance + rot_distance)
         #print("output", output1, output2)

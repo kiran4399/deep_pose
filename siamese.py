@@ -79,25 +79,31 @@ class SiameseNetwork(nn.Module):
             conv_dw(64, 128, 2),
             conv_dw(128, 128, 1),
             conv_dw(128, 256, 2),
-            #conv_dw(256, 256, 1),
-            #conv_dw(256, 256, 1),
-            #conv_dw(256, 256, 1),
             conv_dw(256, 256, 1),
             conv_dw(256, 256, 1),
+            conv_dw(256, 256, 1),
+            #conv_dw(256, 256, 1),
+            #conv_dw(256, 256, 1),
             conv_dw(256, 512, 2),
             conv_dw(512, 512, 1),
+            #conv_dw(256, 512, 2),
+            #conv_dw(512, 512, 1),
             #nn.AvgPool2d(7),
         )
 
         self.spp = SPPLayer([1,2,4,7])
-        self.fc = nn.Linear(46080, 7)
+        self.fc1 = nn.Linear(92160, 7)
+        #self.fc2 = nn.Linear(512, 7)
+	#self.fc2 = nn.Linear(512, 256)
+	#self.fc3 = nn.Linear(256, 7)
             #nn.BatchNorm1d(7),
     def forward_once(self, x):
         output = self.model(x)
         #print(output)
         output = self.spp(output)
         #print(output)
-        output = self.fc(output)
+	##output = self.fc2(output)
+	#output = self.fc3(output)
         #output = nn.BatchNorm1d(7)
         #print(output)
         return output
@@ -105,4 +111,8 @@ class SiameseNetwork(nn.Module):
     def forward(self, input1, input2):
         output1 = self.forward_once(input1)
         output2 = self.forward_once(input2)
-        return output1, output2
+	#out = output1 - output2
+        out = torch.cat((output1, output2), 1)
+        #out = self.fc1(out)
+        total = self.fc1(out)
+        return total
