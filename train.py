@@ -17,8 +17,8 @@ import torch.utils.data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
-import mobilenet
-import wideresnet
+import siamese
+import dataset
 import pdb
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -180,7 +180,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
         loss2.data = torch.mul(loss2.data, 10)
 
         loss = sum(loss1, loss2)
-        
+
         # measure accuracy and record loss
         prec1, prec5 = accuracy(output.data, target1, topk=(1, 5))
         losses.update(loss1.data[0] + 10*loss2.data[0], input1.size(0))
