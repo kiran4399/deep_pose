@@ -41,7 +41,7 @@ class SiameseNetworkDataset(Dataset):
         if not(os.path.isfile(impath + res[0].replace(" ", ""))):
 	    print res[0]
 	    res = read.ix[index+1][:]
-	img0 = Image.open(impath + res[0].replace(" ", ""))
+	    img0 = Image.open(impath + res[0].replace(" ", ""))
         img1 = Image.open(impath + res[1].replace(" ", ""))
         if self.transform is not None:
             img0 = self.transform(img0)
@@ -49,11 +49,11 @@ class SiameseNetworkDataset(Dataset):
         trans = np.array([res[2], res[3], res[4]])
         nor = LA.norm(trans)
 	#print trans
-	if nor == 0:
-	    nor = 1
-        label = np.array([res[2]/nor, res[3]/nor, res[4]/nor, res[6], res[7], res[8], res[5]], dtype=np.float32)
+	#if nor == 0:
+	    #nor = 1
+        #label = np.array([res[2]/nor, res[3]/nor, res[4]/nor, res[6], res[7], res[8], res[5]], dtype=np.float32)
 	#print label
-        return img0, img1, torch.from_numpy(label)
+        return img0, img1, torch.from_numpy(np.array([res[2]], dtype=np.float32)), torch.from_numpy(np.array([res[3]], dtype=np.float32))
     
     def __len__(self):
         read = pd.read_csv(self.csvfile)
