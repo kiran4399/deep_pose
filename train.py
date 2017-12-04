@@ -177,8 +177,12 @@ def train(train_loader, model, criterion, optimizer, epoch):
         loss1 = criterion(output1, target_var1)
         loss2 = criterion(output2, target_var2)
 
+        loss2.data = torch.mul(loss2.data, 10)
+
+        loss = sum(loss1, loss2)
+        
         # measure accuracy and record loss
-        prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
+        prec1, prec5 = accuracy(output.data, target1, topk=(1, 5))
         losses.update(loss1.data[0] + 10*loss2.data[0], input1.size(0))
         top1.update(prec1[0], input1.size(0))
         top5.update(prec5[0], input1.size(0))
