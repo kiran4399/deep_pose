@@ -44,7 +44,7 @@ class SiameseNetworkDataset(Dataset):
 	    #nor = 1
         #label = np.array([res[2]/nor, res[3]/nor, res[4]/nor, res[6], res[7], res[8], res[5]], dtype=np.float32)
 	#print label
-        return img0, img1, torch.from_numpy(np.array([res[2]], dtype=np.float32)), torch.from_numpy(np.array([res[3]], dtype=np.float32))
+        return img0, img1, res[2], res[3]
     
     def __len__(self):
         read = pd.read_csv(self.csvfile)
