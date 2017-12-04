@@ -34,20 +34,11 @@ class SiameseNetworkDataset(Dataset):
 
 
         impath = os.path.join(self.imageFolderDataset)
-        if not(os.path.isfile(impath + res[0].replace(" ", ""))):
-	    print res[0]
-	    res = read.ix[index+1][:]
-
-        if not(os.path.isfile(impath + res[0].replace(" ", ""))):
-	    print res[0]
-	    res = read.ix[index+1][:]
-	    img0 = Image.open(impath + res[0].replace(" ", ""))
+	img0 = Image.open(impath + res[0].replace(" ", ""))
         img1 = Image.open(impath + res[1].replace(" ", ""))
         if self.transform is not None:
             img0 = self.transform(img0)
             img1 = self.transform(img1)
-        trans = np.array([res[2], res[3], res[4]])
-        nor = LA.norm(trans)
 	#print trans
 	#if nor == 0:
 	    #nor = 1

@@ -162,10 +162,10 @@ def train(train_loader, model, criterion, optimizer, epoch):
     model.train()
 
     end = time.time()
-    for i, (input1, input2, target1, target2) in enumerate(train_loader):
-        # measure data loading time
+    for i, data in enumerate(train_loader, 0):
+        # masure datau loading time
         data_time.update(time.time() - end)
-
+	input1, input2, target1, target2 = data
         target1 = target1.cuda(async=True)
         target2 = target2.cuda(async=True)
         input_var1 = torch.autograd.Variable(input1)
