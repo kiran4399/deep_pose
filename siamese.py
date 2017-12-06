@@ -119,4 +119,6 @@ class SiameseNetwork(nn.Module):
         #out = self.fc1(out)
         total1 = self.fc2(out)
         total2 = self.fc(out)
-        return total1, total2
+        final = torch.cat((total1, total2), 1)
+        #return total1, total2
+        return final

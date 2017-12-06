@@ -39,9 +39,12 @@ class SiameseNetworkDataset(Dataset):
         if self.transform is not None:
             img0 = self.transform(img0)
             img1 = self.transform(img1)
-	#print trans
-	#print label
-        return img0, img1, res[2], res[3]
+	    
+        trans = np.eye(27)[res[2]]
+	    rot = np.eye(125)[res[3]]
+        target2 = np.concatenate(trans, rot)
+        #return img0, img1, res[2], res[3]
+        return img0, img1, target2
     
     def __len__(self):
         read = pd.read_csv(self.csvfile)
