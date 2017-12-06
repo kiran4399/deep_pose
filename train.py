@@ -219,24 +219,23 @@ def validate(val_loader, model, criterion):
     for i, data in enumerate(val_loader, 0):
         # masure datau loading time
         input1, input2, target1, target2 = data
-        #target1 = target1.cuda(async=True)
+        target1 = target1.cuda(async=True)
         target2 = target2.cuda(async=True)
         input_var1 = torch.autograd.Variable(input1)
         input_var2 = torch.autograd.Variable(input2)
-        #target_var1 = torch.autograd.Variable(target1)
+        target_var1 = torch.autograd.Variable(target1)
         target_var2 = torch.autograd.Variable(target2)
         # compute output
-        output2 = model(input_var1, input_var2)
+        output1, output2 = model(input_var1, input_var2)
         #print target_var1
-        #loss1 = criterion(output1, target_var1)
+        loss1 = criterion(output1, target_var1)
         loss2 = criterion(output2, target_var2)
-        loss2.data = torch.mul(loss2.data, 10)
 
-       # loss = sum(loss1, loss2)
+        loss = sum(loss1, loss2)
 
         # measure accuracy and record loss
         prec1, prec5 = accuracy(output2.data, target2, topk=(1, 5))
-        losses.update(loss2.data[0], input2.size(0))
+        losses.update(loss.data[0], input2.size(0))
         top1.update(prec1[0], input2.size(0))
         top5.update(prec5[0], input2.size(0))
 

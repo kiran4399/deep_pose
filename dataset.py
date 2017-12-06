@@ -40,9 +40,6 @@ class SiameseNetworkDataset(Dataset):
             img0 = self.transform(img0)
             img1 = self.transform(img1)
 	#print trans
-	#if nor == 0:
-	    #nor = 1
-        #label = np.array([res[2]/nor, res[3]/nor, res[4]/nor, res[6], res[7], res[8], res[5]], dtype=np.float32)
 	#print label
         return img0, img1, res[2], res[3]
     
