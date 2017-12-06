@@ -22,7 +22,7 @@ model_names = sorted(name for name in models.__dict__
 model_names.append('siamnet')
 class SPPLayer(nn.Module):
 
-    def __init__(self, levels, pool_type='max_pool'):
+    def __init__(self, levels, pool_type='avg_pool'):
         super(SPPLayer, self).__init__()
 
         self.levels = levels
@@ -38,7 +38,7 @@ class SPPLayer(nn.Module):
             #print("stride is ", kernel_stride)
             #print("size is ", kernel_size)
             if self.pool_type == 'max_pool':
-                tensor = F.max_pool2d(x, kernel_size=kernel_size,
+                tensor = F.avg_pool2d(x, kernel_size=kernel_size,
                                       stride=kernel_stride).view(bs, -1)
             else:
                 tensor = F.avg_pool2d(x, kernel_size=kernel_size,
@@ -92,9 +92,9 @@ class SiameseNetwork(nn.Module):
         )
 
         self.spp = SPPLayer([1,2,4,7])
-        self.fc1 = nn.Linear(92160, 27)
-        self.fc2 = nn.Linear(92160, 125)
-        #self.fc2 = nn.Linear(512, 7)
+        #self.fc3 = nn.Linear(512, 256)
+        self.fc = nn.Linear(92160, 125)
+        #self.fc2 = nn.Linear(512, 125)
     #self.fc2 = nn.Linear(512, 256)
     #self.fc3 = nn.Linear(256, 7)
             #nn.BatchNorm1d(7),
@@ -103,8 +103,9 @@ class SiameseNetwork(nn.Module):
         #print(output)
         output = self.spp(output)
         #print(output)
-    ##output = self.fc2(output)
-    #output = self.fc3(output)
+        #output = self.fc2(output)
+   	
+	#output = output.view(-1, 512)
         #output = nn.BatchNorm1d(7)
         #print(output)
         return output
@@ -112,9 +113,8 @@ class SiameseNetwork(nn.Module):
     def forward(self, input1, input2):
         output1 = self.forward_once(input1)
         output2 = self.forward_once(input2)
-        #out = output1 - output2
         out = torch.cat((output1, output2), 1)
+	#print out
         #out = self.fc1(out)
-        total1 = self.fc1(out)
-        total2 = self.fc2(out)
-        return total1, total2
+        total2 = self.fc(out)
+        return total2

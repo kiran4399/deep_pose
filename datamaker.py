@@ -48,10 +48,11 @@ def make_data(fdir):
 			finalfile.write(str(rgb[prergb][1]) + ", " + str(rgb[i][1]) + ", " + str(val[0]) + ", " + str(val[1]) + ", " + str(val[2]) + ", " + str(val[3]) + ", " + str(val[4]) + ", " + str(val[5]) + ", " + str(val[6]) + "\n")
 			prergb = i
 			pretruth = j
-			copyfile(fdir + '/' + rgb[i][1], '../final/' + rgb[i][1])
+			copyfile(fdir + '/' + rgb[i][1], '../fin/' + rgb[i][1])
 			#print "done"
 
 		else:
+			copyfile(fdir + '/' + rgb[i][1], '../fin/' + rgb[i][1])
 			pretruth = j
 			prergb = 0
 
@@ -59,7 +60,6 @@ if __name__ == "__main__":
 ###Go into each directory
 	direct = [dI for dI in os.listdir('.') if os.path.isdir(os.path.join('.',dI))]
 	for each in direct:
-		print each + '/' +each
 		if 'groundtruth.txt' in os.listdir(each):
 			make_data(each)
 		elif 'groundtruth.txt' in os.listdir(each + '/' + each):
