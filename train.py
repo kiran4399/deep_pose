@@ -20,6 +20,8 @@ import torchvision.models as models
 import siamese
 import dataset
 import pdb
+import loss
+
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(models.__dict__[name]))
@@ -98,7 +100,7 @@ def main():
     siamese_train = dataset.SiameseNetworkDataset(imageFolderDataset=args.data,
                                         csvfile=args.traincsv,
                                         transform = transforms.Compose([
-                                        #transforms.RandomSizedCrop(224),
+                                        transforms.RandomSizedCrop(224),
                                         transforms.RandomHorizontalFlip(),
                                         transforms.ToTensor(),
                                         normalize,]))
@@ -121,13 +123,15 @@ def main():
         num_workers=args.workers, pin_memory=True)
 
     # define loss function (criterion) and pptimizer
-    #criterion = nn.CrossEntropyLoss().cuda()
-    criterion = nn.MultiLabelSoftMarginLoss().cuda()
+    criterion = loss.PLoss()
+
+    #optimizer = torch.optim.Adam(model.parameters(), args.lr,
+                                #momentum=args.momentum,
+                                #weight_decay=args.weight_decay)
 
     optimizer = torch.optim.SGD(model.parameters(), args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
-
     if args.evaluate:
         validate(val_loader, model, criterion)
         return
@@ -139,11 +143,11 @@ def main():
         train(train_loader, model, criterion, optimizer, epoch)
 
         # evaluate on validation set
-        prec1 = validate(val_loader, model, criterion)
+        #prec1 = validate(val_loader, model, criterion)
 
         # remember best prec@1 and save checkpoint
-        is_best = prec1 > best_prec1
-        best_prec1 = max(prec1, best_prec1)
+        is_best = best_prec1
+        best_prec1 = max(best_prec1, best_prec1)
         save_checkpoint({
             'epoch': epoch + 1,
             'arch': args.arch,
@@ -163,34 +167,49 @@ def train(train_loader, model, criterion, optimizer, epoch):
     model.train()
 
     end = time.time()
-    for i, data in enumerate(train_loader, 0):
-        # masure datau loading time
+    iteration_number = 0
+    counter = []
+    for i, data in enumerate(train_loader,0):
+        img0, img1, label = data
+        img0, img1, label = torch.autograd.Variable(img0).cuda(), torch.autograd.Variable(img1).cuda(), torch.autograd.Variable(label).cuda(async=True)
+        #total = model(img0, img1)
+        # measure data loading time
         data_time.update(time.time() - end)
-	    input1, input2, target2 = data
-        #target1 = target1.cuda(async=True)
-        target2 = target2.cuda(async=True)
-        #input_var1 = torch.autograd.Variable(input1)
-        input_var2 = torch.autograd.Variable(input2)
-        #target_var1 = torch.autograd.Variable(target1)
-        target_var2 = torch.autograd.Variable(target2)
+
+        #target = target.cuda(async=True)
+        #input_var = torch.autograd.Variable(input)
+        #target_var = torch.autograd.Variable(target)
         # compute output
-        output2 = model(input_var1, input_var2)
-        #print target_var1
-	    #loss1 = criterion(output1, target_var1)
-        loss2 = criterion(output2, target_var2)
-        #loss = sum(loss1, loss2)
-        loss = loss2
-        
+        total = model(img0, img1)
+        #ploss = criterion(total, label)
+	#print ploss
+##############
+        optimizer.zero_grad()
+        ploss = criterion(total,label)
+	#print "ploss is", ploss
+        ploss.backward()
+        optimizer.step()
+        if i %10 == 0 :
+            #print("Epoch number {}\n Current loss {}\n".format(epoch,ploss.data[0]))
+            iteration_number +=10
+            counter.append(iteration_number)
+            losses.update(ploss.data[0])
+############3
         # measure accuracy and record loss
-        prec1, prec5 = accuracy(output2.data, target2, topk=(1, 5))
-        losses.update(loss.data[0], input2.size(0))
-        top1.update(prec1[0], input2.size(0))
-        top5.update(prec5[0], input2.size(0))
+        #total = output1+output2
+	#print total
+	#print label
+	#prec1, prec5 = accuracy(total.data, label, topk=(1, 5))
+    	#ploss = ploss[0]
+	#print ploss
+	#losses.update(ploss.data)
+        #top1.update(prec1[0])
+        #top5.update(prec5[0])
 
         # compute gradient and do SGD step
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+        #optimizer.zero_grad()
+        #ploss.backward()
+        #optimizer.step()
 
         # measure elapsed time
         batch_time.update(time.time() - end)
@@ -200,11 +219,9 @@ def train(train_loader, model, criterion, optimizer, epoch):
             print('Epoch: [{0}][{1}/{2}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
-                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
-                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
-                  'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
+                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(
                    epoch, i, len(train_loader), batch_time=batch_time,
-                   data_time=data_time, loss=losses, top1=top1, top5=top5))
+                   data_time=data_time, loss=losses))
 
 
 def validate(val_loader, model, criterion):
@@ -217,28 +234,20 @@ def validate(val_loader, model, criterion):
     model.eval()
 
     end = time.time()
-    for i, data in enumerate(val_loader, 0):
-        # masure datau loading time
-        input1, input2, target2 = data
-        #target1 = target1.cuda(async=True)
-        target2 = target2.cuda(async=True)
-        #input_var1 = torch.autograd.Variable(input1)
-        input_var2 = torch.autograd.Variable(input2)
-        #target_var1 = torch.autograd.Variable(target1)
-        target_var2 = torch.autograd.Variable(target2)
-        # compute output
-        output2 = model(input_var1, input_var2)
-        #print target_var1
-        #loss1 = criterion(output1, target_var1)
-        loss2 = criterion(output2, target_var2)
+    for i, (input, target) in enumerate(val_loader):
+        target = target.cuda(async=True)
+        input_var = torch.autograd.Variable(input, volatile=True)
+        target_var = torch.autograd.Variable(target, volatile=True)
 
-        #loss = sum(loss1, loss2)
-        loss = loss2
+        # compute output
+        output = model(input_var)
+        loss = criterion(output, target_var)
+
         # measure accuracy and record loss
-        prec1, prec5 = accuracy(output2.data, target2, topk=(1, 5))
-        losses.update(loss.data[0], input2.size(0))
-        top1.update(prec1[0], input2.size(0))
-        top5.update(prec5[0], input2.size(0))
+        prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
+        losses.update(loss.data[0], input.size(0))
+        top1.update(prec1[0], input.size(0))
+        top5.update(prec5[0], input.size(0))
 
         # measure elapsed time
         batch_time.update(time.time() - end)

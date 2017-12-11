@@ -36,17 +36,17 @@ class PLoss(torch.nn.Module):
 	#trans_val = total.index_select(1, trans_ind)
 	#rot_val = total.index_select(1, rot_ind)
         trans_val = total.narrow(1,0,3)
-        rot_val = total.narrow(1,3,4)
+        rot_val = total.narrow(1,3,3)
 	#print trans_val, rot_val
 	#trans_label = label.index_select(1, trans_ind)
 	#rot_label = label.index_select(1, rot_ind)
         trans_label = label.narrow(1,0,3)
-        rot_label = label.narrow(1,3,4)
+        rot_label = label.narrow(1,3,3)
 	#print trans_label
         trans_distance = F.pairwise_distance(trans_val, trans_label)
         rot_distance = F.pairwise_distance(rot_val, rot_label)
 	#print "hello"
-        rot = torch.mul(rot_distance.data, 10)
+        rot = torch.mul(rot_distance.data, 4)
         #print(rot)
         #print "done", trans_distance, rot, beta
        	#print(trans_distance.data)

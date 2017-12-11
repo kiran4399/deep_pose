@@ -93,8 +93,9 @@ class SiameseNetwork(nn.Module):
 
         self.spp = SPPLayer([1,2,4,7])
         #self.fc3 = nn.Linear(512, 256)
-        self.fc = nn.Linear(92160, 125)
-        self.fct = nn.Linear(92160, 27)
+        #self.fc = nn.Linear(92160, 125)
+        self.fc = nn.Linear(92160 ,6)
+       # self.fct = nn.Linear(92160, 27)
         #self.fc2 = nn.Linear(512, 125)
     #self.fc2 = nn.Linear(512, 256)
     #self.fc3 = nn.Linear(256, 7)
@@ -117,8 +118,6 @@ class SiameseNetwork(nn.Module):
         out = torch.cat((output1, output2), 1)
 	#print out
         #out = self.fc1(out)
-        total1 = self.fc2(out)
+        #total1 = self.fct(out)
         total2 = self.fc(out)
-        final = torch.cat((total1, total2), 1)
-        #return total1, total2
-        return final
+        return total2
